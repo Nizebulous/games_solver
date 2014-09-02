@@ -87,7 +87,16 @@ class TicTacToe(object):
         print
         print '======================='
         print 'Current game board:'
+        print
+        print '                columns'
+        print '             1  |  2  |  3'
+        print '         --------------------'
+        print '        |'
         for row_i, row in enumerate(self.board):
+            if row_i == 1:
+                print 'rows ', row_i + 1, '|   ',
+            else:
+                print '     ', row_i + 1, '|   ',
             for column_i, space in enumerate(row):
                 if space:
                     print space,
@@ -98,7 +107,9 @@ class TicTacToe(object):
                 else:
                     print
             if row_i < 2:
-                print '-------------'
+                print '     -- |   ---------------'
+        print '        |'
+        print
         print 'Player %s\'s turn (%s)!' % (str(self.players_turn + 1), self.PLAYER_PIECES[self.players_turn])
         print '======================='
         print
