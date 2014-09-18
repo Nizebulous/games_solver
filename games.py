@@ -18,6 +18,12 @@ def list():
     List the supported games
     """
     print "Supported games:"
+    games = filter(lambda x: not x.startswith('__'), dir(game_modules))
+    print
+    for game in games:
+        game_class = getattr(game_modules, game)
+        print game, ' - ', game_class.__doc__
+    print
 
 
 def play(game):
@@ -61,7 +67,8 @@ def solve(game):
     """
     Solve and store a specified game
     """
-    print "Solving ", game, "..."
+    print 'Not currently supported!'
+    #print "Solving ", game, "..."
 
 
 if __name__ == '__main__':

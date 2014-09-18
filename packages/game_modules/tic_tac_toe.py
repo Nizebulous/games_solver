@@ -3,7 +3,7 @@ from packages.utils import Value
 
 class TicTacToe(object):
     """
-    Game logic for TicTacToe
+    The classic game of Tic Tac Toe
     """
 
     PLAYER_PIECES = ['x', 'o']
