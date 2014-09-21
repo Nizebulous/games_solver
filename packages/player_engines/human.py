@@ -1,6 +1,10 @@
-class Human(object):
+from base import BasePlayer
 
-    def get_input(self, menu_commands, moves):
+
+class Human(BasePlayer):
+
+    def get_input(self, board, menu_commands):
+        moves = board.get_moves()
         while True:
             print 'Possible moves: '
             if moves:

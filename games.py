@@ -4,8 +4,10 @@ import argparse
 from types import FunctionType
 from ConfigParser import ConfigParser
 
-from packages import game_modules
+from packages import modules
+from packages import solvers
 from packages import player_engines
+from packages import solution_stores
 from packages.utils import Value
 
 
@@ -18,10 +20,10 @@ def list():
     List the supported games
     """
     print "Supported games:"
-    games = filter(lambda x: not x.startswith('__'), dir(game_modules))
+    games = filter(lambda x: not x.startswith('__'), dir(modules))
     print
     for game in games:
-        game_class = getattr(game_modules, game)
+        game_class = getattr(modules, game)
         print game, ' - ', game_class.__doc__
     print
 
@@ -29,35 +31,33 @@ def list():
 def play(game):
     """
     Play a specified game
-    1. Solve if it hasn't been solved
-    2. Start game-loop
     """
     print "Loading ", game, "..."
-    game_logic = getattr(game_modules, game)()
+    game_logic = getattr(modules, game)
+    board = game_logic()
     players = [
-        getattr(player_engines, games_config.get('player_one', 'engine'))(),
-        getattr(player_engines, games_config.get('player_two', 'engine'))()
+        getattr(player_engines, games_config.get('player_one', 'engine'))(games_config, game_logic),
+        getattr(player_engines, games_config.get('player_two', 'engine'))(games_config, game_logic)
     ]
     player_turn = 0
     while True:
-        moves = game_logic.get_moves()
-        game_logic.print_position()
-        command = players[player_turn].get_input(['q'], moves)
+        board.print_position()
+        command = players[player_turn].get_input(board, ['q'])
         if command == 'q':
             break
         else:
             try:
-                game_logic.do_move(command)
+                board.do_move(command)
             except Exception:
                 print 'Invalid move!'
             else:
-                value = game_logic.get_value()
+                value = board.get_value()
                 if value:
                     if value == Value.LOSS:
-                        game_logic.print_position()
+                        board.print_position()
                         print 'Player %s wins!' % str(player_turn + 1)
                     else:
-                        game_logic.print_position()
+                        board.print_position()
                         print 'Cat\'s game!'
                     break
                 player_turn = (player_turn + 1) % 2
@@ -67,8 +67,12 @@ def solve(game):
     """
     Solve and store a specified game
     """
-    print 'Not currently supported!'
-    #print "Solving ", game, "..."
+    print "Solving", game, "..."
+    game_logic = getattr(modules, game)
+    solution_store = getattr(solution_stores, games_config.get('solution', 'engine'))
+    game_solver = getattr(solvers, games_config.get('solver', 'engine'))(game_logic, solution_store)
+    game_solver.solve()
+    print "Done."
 
 
 if __name__ == '__main__':
