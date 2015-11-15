@@ -3,7 +3,9 @@ class Value(object):
     WIN = 1
     TIE = 2
     LOSS = 3
-    values = ['UNKNOWN', 'WIN', 'TIE', 'LOSS']
+    # Special case...a draw is what we have left over as unkown when done solving a game
+    DRAW = 0
+    values = ['DRAW', 'WIN', 'TIE', 'LOSS']
 
     @classmethod
     def print_value(cls, value):

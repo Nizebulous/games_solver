@@ -15,7 +15,9 @@ class Computer(BasePlayer):
         solution_store = getattr(solution_stores, self.player_config.get('solution', 'engine'))
         self.game_solution = solution_store(self.game_logic.id())
         if not self.game_solution.get_value(self.game_logic()):
-            solver = getattr(solvers, self.player_config.get('solver', 'engine'))(self.game_logic, solution_store)
+            solver = getattr(
+                solvers, self.player_config.get('solver', 'engine')
+            )(self.game_logic, solution_store)
             solver.solve()
             self.game_solution.load()
 
@@ -24,18 +26,11 @@ class Computer(BasePlayer):
         Get the computer's input
         """
         moves = board.get_moves()
-        win_moves = []
-        tie_moves = []
-        loss_moves = []
+        moves_by_value = {}
         for index, move in enumerate(moves):
             board.do_move(move)
             value = self.game_solution.get_value(board)
-            if value == Value.LOSS:
-                win_moves.append(index)
-            elif value == Value.TIE:
-                tie_moves.append(index)
-            else:
-                loss_moves.append(index)
+            moves_by_value.setdefault(value, []).append((index, move))
             board.undo_move(move)
 
         print 'Possible moves: '
@@ -43,15 +38,14 @@ class Computer(BasePlayer):
             for index, move in enumerate(moves, start=1):
                 print '%s. %s' % (index, move)
 
-        if win_moves:
-            chosen_index = win_moves[0]
-            chosen_move = moves[chosen_index]
-        elif tie_moves:
-            chosen_index = tie_moves[0]
-            chosen_move = moves[chosen_index]
-        else:
-            chosen_index = loss_moves[0]
-            chosen_move = moves[chosen_index]
+        if Value.LOSS in moves_by_value:
+            chosen_index, chosen_move = moves_by_value[Value.LOSS][0]
+        elif Value.TIE in moves_by_value:
+            chosen_index, chosen_move = moves_by_value[Value.TIE][0]
+        elif Value.DRAW in moves_by_value:
+            chosen_index, chosen_move = moves_by_value[Value.DRAW][0]
+        elif Value.WIN in moves_by_value:
+            chosen_index, chosen_move = moves_by_value[Value.WIN][0]
 
         print
         print 'Computer chooses: %s. %s' % (chosen_index + 1, chosen_move)

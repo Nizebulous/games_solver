@@ -23,8 +23,9 @@ def list():
     games = filter(lambda x: not x.startswith('__'), dir(modules))
     print
     for game in games:
-        game_class = getattr(modules, game)
-        print game, ' - ', game_class.__doc__
+        if game != 'base':
+            game_class = getattr(modules, game)
+            print game, ' - ', game_class.__doc__
     print
 
 
@@ -75,10 +76,50 @@ def solve(game):
     print "Done."
 
 
+def validate(game):
+    """
+    Validate the solution of a specific game
+    """
+    print "Verifying solution for ", game, "..."
+    game_logic = getattr(modules, game)
+    solution_store = getattr(solution_stores, games_config.get('solution', 'engine'))
+    game_solver = getattr(solvers, games_config.get('solver', 'engine'))(game_logic, solution_store)
+    data = solution_store(game_logic.id())
+    if not data.get_value(game_logic()):
+        game_solver.solve()
+    data = solution_store(game_logic.id())
+    for position, value in data.values.items():
+        board = game_logic.unhash(position)
+        assert position == board.hash()
+        moves = board.get_moves()
+        values = set()
+        for move in moves:
+            board.do_move(move)
+            values.add(data.get_value(board))
+            board.undo_move(move)
+        if value == Value.WIN:
+            assert Value.LOSS in values
+        elif value == Value.TIE:
+            assert Value.LOSS not in values
+            assert Value.TIE in values
+        elif value == Value.LOSS:
+            assert Value.LOSS not in values
+            assert Value.TIE not in values
+            assert Value.DRAW not in values
+        elif value == Value.DRAW:
+            assert Value.LOSS not in values
+            assert Value.TIE not in values
+            assert Value.DRAW in values
+    print "Done."
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='2-person perfect information game solver')
     current_scope = globals()
-    parser.add_argument('command', choices=filter(lambda x: isinstance(current_scope[x], FunctionType), current_scope))
+    parser.add_argument(
+        'command',
+        choices=filter(lambda x: isinstance(current_scope[x], FunctionType), current_scope)
+    )
     parser.add_argument('args', nargs=argparse.REMAINDER)
     args = parser.parse_args()
     current_scope[args.command](*args.args)
