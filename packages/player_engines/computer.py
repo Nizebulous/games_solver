@@ -1,3 +1,5 @@
+from time import sleep
+
 from base import BasePlayer
 
 from packages import solvers
@@ -49,4 +51,5 @@ class Computer(BasePlayer):
 
         print
         print 'Computer chooses: %s. %s' % (chosen_index + 1, chosen_move)
+        sleep(2)
         return chosen_move

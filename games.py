@@ -91,25 +91,28 @@ def validate(game):
     for position, value in data.values.items():
         board = game_logic.unhash(position)
         assert position == board.hash()
-        moves = board.get_moves()
-        values = set()
-        for move in moves:
-            board.do_move(move)
-            values.add(data.get_value(board))
-            board.undo_move(move)
-        if value == Value.WIN:
-            assert Value.LOSS in values
-        elif value == Value.TIE:
-            assert Value.LOSS not in values
-            assert Value.TIE in values
-        elif value == Value.LOSS:
-            assert Value.LOSS not in values
-            assert Value.TIE not in values
-            assert Value.DRAW not in values
-        elif value == Value.DRAW:
-            assert Value.LOSS not in values
-            assert Value.TIE not in values
-            assert Value.DRAW in values
+        if not board.get_value():
+            moves = board.get_moves()
+            values = set()
+            for move in moves:
+                board.do_move(move)
+                values.add(data.get_value(board))
+                board.undo_move(move)
+            if value == Value.WIN:
+                assert Value.LOSS in values
+            elif value == Value.TIE:
+                assert Value.LOSS not in values
+                assert Value.TIE in values
+            elif value == Value.LOSS:
+                assert Value.LOSS not in values
+                assert Value.TIE not in values
+                assert Value.DRAW not in values
+            elif value == Value.DRAW:
+                assert Value.LOSS not in values
+                assert Value.TIE not in values
+                assert Value.DRAW in values
+    print 'Number of positions:', len(data.values)
+    print 'Highest hash:', max(data.values.keys())
     print "Done."
 
 

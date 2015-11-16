@@ -32,8 +32,8 @@ class TicTacToe(BaseGame):
         for index in range(9):
             row, col = self._index_to_coords(index)
             hash += self.board[row][col]
-            if index != 8:
-                hash <<= 2
+            hash *= 3
+        hash /= 3
         return hash
 
     @classmethod
@@ -44,17 +44,17 @@ class TicTacToe(BaseGame):
         board = cls()
         x_count = 0
         o_count = 0
-        for index in range(9).reverse():
+        for index in range(8, -1, -1):
             row, col = cls._index_to_coords(index)
-            piece_value = hash % 4
-            board[row][col] = piece_value
+            piece_value = hash % 3
+            board.board[row][col] = piece_value
             if cls.PLAYER_PIECES[piece_value] == 'x':
                 x_count += 1
             elif cls.PLAYER_PIECES[piece_value] == 'o':
                 o_count += 1
-            hash >>= 2
+            hash /= 3
         if x_count == o_count + 1:
-            board.players_turn = 1
+            board.players_turn = cls.O
         else:
             assert(x_count == o_count)
         return board
@@ -90,12 +90,14 @@ class TicTacToe(BaseGame):
         """
         other_player = (self.players_turn + 1) % 2
         # rows
-        for row in range(0, 3):
-            if self.board[row][0] == self.board[row][1] == self.board[row][2] == other_player:
+        for row in self.board:
+            if row[0] == row[1] == row[2] == other_player:
                 return Value.LOSS
         # columns
         for column in range(0, 3):
-            if self.board[0][column] == self.board[1][column] == self.board[2][column] == other_player:
+            if self.board[0][column] == \
+                    self.board[1][column] == \
+                    self.board[2][column] == other_player:
                 return Value.LOSS
 
         # diagonals
@@ -137,7 +139,9 @@ class TicTacToe(BaseGame):
                 print '     -- |   ---------------'
         print '        |'
         print
-        print 'Player %s\'s turn (%s)!' % (str(self.players_turn + 1), self.PLAYER_PIECES[self.players_turn])
+        print 'Player {}\'s turn ({})!'.format(
+            str(self.players_turn + 1), self.PLAYER_PIECES[self.players_turn]
+        )
         print '======================='
         print
 
